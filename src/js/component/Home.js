@@ -13,7 +13,7 @@ const Home = () => {
     const [todos, setTodos] = useState([]);
 	const [newTodo, setNewTodo] = useState("");
 
-	useEffect(()=>{
+	const createUser = () => {
 		const newUser = {"name": "AntonioBG89", "todos": []};
 		fetch(getUserURL, {
 			method: "POST",
@@ -25,7 +25,9 @@ const Home = () => {
 		.then(response => response.json())
 		.then(data => console.log("User created:", data))
 		.catch(error => console.error("Error creating user:", error));
-	}, []);
+	}
+	
+	useEffect(()=>{createUser()}, []);
 	
 	//fecth (url de la API, {metodos, body, infor es un json})
 	//.then (codigo de status y el mensaje, aquí se convierte de json a JS)
@@ -74,8 +76,16 @@ const Home = () => {
 				'Content-Type': 'application/json'
 			}
 		})
-		.then(response => response.json())
-		.then(data => console.log("User deleted:", data))
+		.then(response => {
+			if (response.ok){
+				setTodos([]);
+				console.log("User and all associated ToDos deleted successfully.");
+				createUser();
+			} else {
+				console.error("Failed to delete user.");
+				
+			}
+		})
 		.catch(error => console.log("Error deleting User:", error));
 	};
 
@@ -135,7 +145,7 @@ const Home = () => {
 				</div >
 
 				<button className="col-2 btn btn-danger" onClick={clearAllTodos}>Clear All!!</button>
-				<button className="col-3 btn btn-info" onClick={deleteUser}>Clear User</button>
+				<button className="col-3 btn btn-info" onClick={deleteUser}>Clear User and ToDos</button>
 				
 				<p className="d-flex justify-context-start px-5 mt-3">{todos.length} items left</p>
 			</div>
