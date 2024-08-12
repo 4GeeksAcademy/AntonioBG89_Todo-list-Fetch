@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 
 //include images into your bundle
 import ToDoComponent from "./ToDoComponent";
-import { RxValue } from "react-icons/rx";
 
 //create your first component
 const Home = () => {
@@ -24,7 +23,7 @@ const Home = () => {
 		})
 		.then(response => response.json())
 		.then(data => console.log("User created:", data))
-		.catch(error => console.log("Error creating user:", error));
+		.catch(error => console.error("Error creating user:", error));
 	}, []);
 	
 	//fecth (url de la API, {metodos, body, infor es un json})
@@ -33,8 +32,8 @@ const Home = () => {
 	//.catch (si algo sale mal en el código de aquí es donde obtenemos la info de error)
 	// Si el método no se especifica en el fetch, automáticamente se interpreta como un GET
 
-	const addTodo = (label) => {
-		const newToDo = {"label": {newTodo}, "is_done": false};
+	const addTodo = () => {
+		const newToDo = {"label": newTodo, "is_done": false};
 		fetch(getToDoURL, {
 			method: "POST",
 			body: JSON.stringify(newToDo),
@@ -45,11 +44,27 @@ const Home = () => {
 		.then(response => response.json())
 		.then(data => {
 			console.log("ToDo added:", data);
-			setTodos([...todos, data]);			
+			setTodos([...todos, data]);
 		})
 		.catch(error => console.error("Error adding ToDo:", error));
 		
 	};
+
+	const deleteTodo = (id) => {
+		fetch(`${getToDoURL}/${id}`, {
+			method: "DELETE",
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		})
+		.then(response => {
+			if (response.ok){
+				setTodos(todos.filter(todo => todo.id !== id));
+				console.log(`ToDo with id ${id} deleted successfully.`);				
+			} else {console.error(`Failed to delete ToDo with id ${id}.`);}
+		})
+		.catch(error => console.error("Error deleting ToDo:", error));
+	}
 
 	const handleKeyDown = (e) => {
 		if (e.key === "Enter" && newTodo.trim() !== "") {
@@ -81,9 +96,7 @@ const Home = () => {
 							key={value.id}
 							toDo={value.label}
 							onDelete={() => {
-								const updatedTodos = todos.filter((_, i) => i !== value.id);
-								setTodos(updatedTodos);
-							}}
+								deleteTodo(value.id)}}
 						/>
 					 ))}
 				</div >
