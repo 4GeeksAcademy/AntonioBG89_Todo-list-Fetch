@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 //include images into your bundle
 import ToDoComponent from "./ToDoComponent";
@@ -11,58 +11,52 @@ const Home = () => {
 	const getToDoURL = "https://playground.4geeks.com/todo/todos/AntonioBG89";
 
     const [todos, setTodos] = useState([]);
+	const [newTodo, setNewTodo] = useState("");
+
+	useEffect(()=>{
+		const newUser = {"name": "AntonioBG89", "todos": []};
+		fetch(getUserURL, {
+			method: "POST",
+			body: JSON.stringify(newUser),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		})
+		.then(response => response.json())
+		.then(data => console.log("User created:", data))
+		.catch(error => console.log("Error creating user:", error));
+	}, []);
+	
 	//fecth (url de la API, {metodos, body, infor es un json})
 	//.then (codigo de status y el mensaje, aquí se convierte de json a JS)
 	//.then (manejar la info que nos llega de la API)
 	//.catch (si algo sale mal en el código de aquí es donde obtenemos la info de error)
 	// Si el método no se especifica en el fetch, automáticamente se interpreta como un GET
-	/* fetch(userUrl)
-	.then((response)=>{console.log(response);
-		return response.json();
-	})
-	.then((data)=>{console.log(data);
-	})
-	.catch((error)=>{error});
-	*/
-	let newUser = {"name": "AntonioBG89",
-		"todos": []};
-	let newToDo = {"label": "Pasear perro",
-		"is_done": false};
 
-	fetch(getUserURL, {
-		method: "POST",
-		body: JSON.stringify(newUser)
-	})
-	.then(response => response.json())
-	.then(data => console.log(data))
-	.catch(error => error);
+	const addTodo = (label) => {
+		const newToDo = {"label": {newTodo}, "is_done": false};
+		fetch(getToDoURL, {
+			method: "POST",
+			body: JSON.stringify(newToDo),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		})
+		.then(response => response.json())
+		.then(data => {
+			console.log("ToDo added:", data);
+			setTodos([...todos, data]);			
+		})
+		.catch(error => console.error("Error adding ToDo:", error));
+		
+	};
 
-	fetch(getUserURL, {
-		method : "POST",
-		body: JSON.stringify(newToDo),
-		headers: {
-			'Content-Type': 'aplication/json'
+	const handleKeyDown = (e) => {
+		if (e.key === "Enter" && newTodo.trim() !== "") {
+			addTodo(newTodo);
+			setNewTodo("");
 		}
-	})
-	.then(response => response.json())
-	.then(data => console.log(data))
-	.catch(error => error);
-	
-	// fetch(getUserURL)
-	// 	.then(response => response.json())
-	// 	.then(data => {setTodos(todos)})
-	// 	.catch(error => error);
-
-	//let newToDo = {
-	//	label: "Esperar al cartero",
-	//}
-	// fetch(getToDoURL, {
-	// 	method: "POST",
-	// 	body: JSON.stringify(/*newToDo*/)
-	// })
-	// .then(response => response.json())
-	// .then(data => console.log(data))
-	// .catch(error => error);
+	};
 
 	return (
 		<div className="container text-center mt-5">
@@ -73,23 +67,23 @@ const Home = () => {
 					<input
 						type="text"
 						className="form-control"
-						id="toDolist" placeholder="What needs to be done?"
-						value={data.todos}
-						onKeyDown={(e) => {
-							if (e.key === "Enter") {
-								setTodos([...todos]);
-							}
-						}} onChange={(e) => {
-							setTodos(e.target.value);
-						}} />
+						id="toDolist"
+						placeholder="What needs to be done?"
+						value={newTodo}
+						onKeyDown={handleKeyDown}
+						onChange={(e) => setNewTodo(e.target.value)}
+						/>
 				</div>
 
 				<div className="container mb-5">
-					{todos.map((value, index) => ( 
+					{todos.map((value) => ( 
 						<ToDoComponent
 							key={value.id}
-							todo={value.label}
-							onDelete={() => deleteToDo(index)}
+							toDo={value.label}
+							onDelete={() => {
+								const updatedTodos = todos.filter((_, i) => i !== value.id);
+								setTodos(updatedTodos);
+							}}
 						/>
 					 ))}
 				</div >

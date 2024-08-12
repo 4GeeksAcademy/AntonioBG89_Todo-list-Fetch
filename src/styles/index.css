@@ -1,4 +1,20 @@
+body {
+    background: blanchedalmond;
+}
+.estiloListaTodos{
+    width: 500px;
+    border: 1px solid #ced4da;
+    border-radius: .375rem;
+    padding: .375rem .75rem;
+    background-color: rgb(245, 212, 162);
+    text-align: start;
+    
+}
 
+.form-label {
+    font-size: 50px;
+    color: pink;
+}
 /* 
 
     You can write your own styles here...
