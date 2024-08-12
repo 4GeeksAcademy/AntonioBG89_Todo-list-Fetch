@@ -8,6 +8,7 @@ const Home = () => {
 	//LOGICA
 	const getUserURL = "https://playground.4geeks.com/todo/users/AntonioBG89";
 	const getToDoURL = "https://playground.4geeks.com/todo/todos/AntonioBG89";
+	const getToDoURLDelete = "https://playground.4geeks.com/todo/todos";
 
     const [todos, setTodos] = useState([]);
 	const [newTodo, setNewTodo] = useState("");
@@ -51,7 +52,7 @@ const Home = () => {
 	};
 
 	const deleteTodo = (id) => {
-		fetch(`${getToDoURL}/${id}`, {
+		fetch(`${getToDoURLDelete}/${id}`, {
 			method: "DELETE",
 			headers: {
 				'Content-Type': 'application/json'
@@ -64,7 +65,39 @@ const Home = () => {
 			} else {console.error(`Failed to delete ToDo with id ${id}.`);}
 		})
 		.catch(error => console.error("Error deleting ToDo:", error));
-	}
+	};
+
+	const deleteUser = () => {
+		fetch(getUserURL, {
+			method: "DELETE",
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		})
+		.then(response => response.json())
+		.then(data => console.log("User deleted:", data))
+		.catch(error => console.log("Error deleting User:", error));
+	};
+
+	const clearAllTodos = () => {
+		const deletePromises = todos.map(todo =>
+			fetch(`${getToDoURLDelete}/${todo.id}`, {
+				method: "DELETE",
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			})
+		);
+
+		Promise.all(deletePromises)
+		.then(responses => {
+			if (responses.every(response => response.ok)){
+				setTodos([]);
+				console.log("All ToDos deleted successfully.");
+			} else {console.error("Failed to delete some ToDos.");}
+		})
+		.catch(error => console.error("Error deleting all ToDos", error));
+	};
 
 	const handleKeyDown = (e) => {
 		if (e.key === "Enter" && newTodo.trim() !== "") {
@@ -101,9 +134,8 @@ const Home = () => {
 					 ))}
 				</div >
 
-				<button className="col-1 btn btn-danger" onClick={() => {
-					setTodos([]);
-				}}>Clear All!!</button>
+				<button className="col-2 btn btn-danger" onClick={clearAllTodos}>Clear All!!</button>
+				<button className="col-3 btn btn-info" onClick={deleteUser}>Clear User</button>
 				
 				<p className="d-flex justify-context-start px-5 mt-3">{todos.length} items left</p>
 			</div>
